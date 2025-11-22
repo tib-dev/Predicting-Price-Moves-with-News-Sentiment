@@ -2,10 +2,26 @@ pandas
 numpy
 matplotlib
 seaborn
+
+# NLP & sentiment
 nltk
-scikit-learn
 textblob
+vaderSentiment
+
+# ML & utils
+scikit-learn
 jupyter
-talib
+
+# Finance & TA
 pynance
+TA-Lib        
+pandas_ta   
+
+# timezone / date
+python-dateutil
 pytz
+
+# dev / testing
+pytest
+black
+isort
