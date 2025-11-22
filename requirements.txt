@@ -14,7 +14,7 @@ jupyter
 
 # Finance & TA
 pynance       
-pandas_ta   
+TA-Lib 
 
 # timezone / date
 python-dateutil
