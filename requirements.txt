@@ -13,8 +13,7 @@ scikit-learn
 jupyter
 
 # Finance & TA
-pynance
-TA-Lib        
+pynance       
 pandas_ta   
 
 # timezone / date
