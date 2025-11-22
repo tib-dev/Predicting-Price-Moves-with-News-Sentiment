@@ -20,3 +20,9 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# Data
+data
+data/
+*.csv
+*.tsv

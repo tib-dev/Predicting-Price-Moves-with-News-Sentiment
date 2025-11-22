@@ -64,34 +64,67 @@ The project focuses on:
 ## Folder Structure
 
 ```text
-project-root/
-├── .vscode/
-│   └── settings.json
+predicting-price-moves-with--newssentiment/
 ├── .github/
 │   └── workflows/
-│       └── unittests.yml
-├── notebooks/
+│       └── ci.yml                 # CI: tests, lint, build
+├── docs/                          # Project docs (Sphinx/MD)
+│   └── index.md
+├── notebooks/                      # Exploratory notebooks (not checked in long-term)
 │   ├── eda_news.ipynb
 │   ├── eda_prices.ipynb
-│   └── sentiment_stock_correlation.ipynb
-├── src/
-│   ├── __init__.py
-│   ├── data_loader.py
-│   ├── sentiment.py
-│   ├── indicators.py
-│   └── correlation.py
-├── scripts/
-│   ├── __init__.py
-│   └── download_data.py
-├── tests/
-│   ├── __init__.py
-│   └── test_utils.py
-├── data/
-│   ├── raw/
-│   └── processed/
+│   └── correlation.ipynb
+├── src/                            # Production Python package (importable)
+│   └── fns_project/                # package root (use your project name)
+│       ├── __init__.py
+│       ├── config.py               # global config, constants, paths
+│       ├── logging_config.py       # logger setup
+│       ├── data/                   # data ingestion & transforms
+│       │   ├── __init__.py
+│       │   ├── loader.py           # load news & price files
+│       │   ├── align_dates.py      # date normalization & trading-day mapping
+│       │   └── preprocess.py       # cleaning, text normalization
+│       ├── features/               # feature engineering & indicators
+│       │   ├── __init__.py
+│       │   ├── indicators.py       # wrappers for ta/pandas_ta/TA-Lib
+│       │   └── sentiment_features.py
+│       ├── nlp/                    # NLP utilities & models
+│       │   ├── __init__.py
+│       │   ├── sentiment.py        # sentiment scoring functions (vader/textblob/hf)
+│       │   └── topic_modeling.py   # TF-IDF, LDA helpers
+│       ├── analysis/               # statistical analysis, correlation logic
+│       │   ├── __init__.py
+│       │   ├── correlation.py      # correlation & lag analysis
+│       │   └── stats.py            # tests, p-values, regression helpers
+│       ├── viz/                    # plotting & dashboards
+│       │   ├── __init__.py
+│       │   ├── plots.py            # reusable plotting functions
+│       │   └── dashboard.py        # streamlit/fastapi endpoints (if any)
+│       └── utils/                  # small helpers
+│           ├── __init__.py
+│           ├── io.py               # read/write helpers (csv/parquet)
+│           └── dates.py            # date helpers & timezone utilities
+├── scripts/                        # CLI convenience scripts (data download, run)
+│   ├── download_data.py
+│   ├── run_training.py
+│   └── run_analysis.py
+├── tests/                          # Unit & integration tests
+│   ├── unit/
+│   │   ├── test_loader.py
+│   │   ├── test_sentiment.py
+│   │   └── test_indicators.py
+│   └── integration/
+│       └── test_pipeline.py
+├── data/                           # small sample/test data (gitignored large data)
+│   ├── raw_sample/
+│   └── processed_sample/
+├── configs/                        # YAML/JSON config files for experiments
+│   └── default.yaml
 ├── requirements.txt
+├── pyproject.toml / setup.cfg      # packaging / build metadata (optional)
 ├── README.md
 └── .gitignore
+
 
 ```
 
