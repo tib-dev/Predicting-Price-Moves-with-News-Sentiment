@@ -1,3 +1,4 @@
+"""Module description."""
 from pathlib import Path
 
 

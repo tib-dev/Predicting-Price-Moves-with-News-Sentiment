@@ -1,7 +1,11 @@
+"""Module description."""
 import logging
 
 
+"""Function description."""
+
 def configure_logging(level: int = logging.INFO):
+    """Function description."""
     fmt = "%(asctime)s %(levelname)s %(name)s: %(message)s"
     logging.basicConfig(level=level, format=fmt)
 

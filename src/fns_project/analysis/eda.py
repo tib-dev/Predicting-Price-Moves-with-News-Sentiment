@@ -1,3 +1,5 @@
+"""Module description."""
+
 import pandas as pd
 import numpy as np
 import logging
@@ -44,6 +46,7 @@ def headline_length_stats(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def count_articles_per_publisher(df: pd.DataFrame, col="publisher") -> pd.DataFrame:
+    """Function description."""
     if col not in df.columns:
         logger.warning("Publisher column missing.")
         return pd.DataFrame()
@@ -59,6 +62,7 @@ def count_articles_per_publisher(df: pd.DataFrame, col="publisher") -> pd.DataFr
 
 
 def publication_trend_by_date(df: pd.DataFrame, date_col="date") -> pd.DataFrame:
+    """Function description."""
     df = ensure_datetime(df, date_col)
     trend = df.groupby(df[date_col].dt.date).size(
     ).reset_index(name="article_count")
@@ -66,6 +70,7 @@ def publication_trend_by_date(df: pd.DataFrame, date_col="date") -> pd.DataFrame
 
 
 def publication_trend_by_time(df: pd.DataFrame, date_col="date") -> pd.DataFrame:
+    """Function description."""
     df = ensure_datetime(df, date_col)
     df["hour"] = df[date_col].dt.hour
     trend = (
@@ -89,6 +94,7 @@ def extract_top_keywords(
     min_df=3
 ) -> pd.DataFrame:
 
+    """Function description."""
     if text_col not in df.columns:
         logger.warning(f"Column '{text_col}' missing for keyword extraction.")
         return pd.DataFrame()
@@ -122,6 +128,7 @@ def topic_modeling(
     max_features=4000,
     min_df=3
 ):
+    """Function description."""
     if text_col not in df.columns:
         logger.warning(f"Column '{text_col}' missing for topic modeling.")
         return {}
@@ -155,6 +162,7 @@ def topic_modeling(
 # 5. DOMAIN EXTRACTION
 # =========================================================
 def extract_publisher_domains(df: pd.DataFrame, col="publisher") -> pd.DataFrame:
+    """Function description."""
     if col not in df.columns:
         logger.warning("Publisher column missing.")
         return pd.DataFrame()
