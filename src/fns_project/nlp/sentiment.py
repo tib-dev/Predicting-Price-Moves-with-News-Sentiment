@@ -1,3 +1,5 @@
+"""Module description."""
+
 # fns_project/nlp/sentiment.py
 from __future__ import annotations
 from typing import Optional, Iterable
@@ -15,6 +17,7 @@ logging.basicConfig(level=logging.INFO,
 
 # Lazy imports for heavy libs
 def _get_vader():
+    """Function description."""
     try:
         from nltk.sentiment.vader import SentimentIntensityAnalyzer
     except Exception as e:
@@ -26,6 +29,7 @@ def _get_vader():
 
 
 def _get_textblob():
+    """Function description."""
     try:
         from textblob import TextBlob
     except Exception as e:
@@ -35,6 +39,7 @@ def _get_textblob():
 
 
 def _score_vader_series(series: pd.Series) -> pd.DataFrame:
+    """Function description."""
     sia = _get_vader()
     rows = []
     for txt in series.fillna("").astype(str):
@@ -46,6 +51,7 @@ def _score_vader_series(series: pd.Series) -> pd.DataFrame:
 
 
 def _score_textblob_series(series: pd.Series) -> pd.DataFrame:
+    """Function description."""
     TextBlob = _get_textblob()
     polarity = []
     subjectivity = []

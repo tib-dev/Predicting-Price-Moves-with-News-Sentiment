@@ -1,3 +1,5 @@
+"""Module description."""
+
 # fns_project/viz/plots.py
 from __future__ import annotations
 import logging

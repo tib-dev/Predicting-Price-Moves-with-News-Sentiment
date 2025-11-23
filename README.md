@@ -84,6 +84,7 @@ predicting-price-moves-with--newssentiment/
 │       │   ├── loader.py           # load news & price files
 │       │   ├── align_dates.py      # date normalization & trading-day mapping
 │       │   └── preprocess.py       # cleaning, text normalization
+│       │   └── news_pipeline.py    # containing the OO wrappers and orchestration layer.
 │       ├── features/               # feature engineering & indicators
 │       │   ├── __init__.py
 │       │   ├── indicators.py       # wrappers for ta/pandas_ta/TA-Lib

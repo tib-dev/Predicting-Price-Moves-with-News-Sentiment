@@ -1,4 +1,5 @@
-# fns_project/features/indicators.py
+"""Module for computing technical indicators on financial data."""
+
 from __future__ import annotations
 import logging
 from typing import Optional
@@ -9,8 +10,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(message)s")
 
-
+# -----------------------------
 # Attempt to import TA-Lib, fallback to pandas_ta
+# -----------------------------
 try:
     import talib
     _HAS_TALIB = True
@@ -22,11 +24,15 @@ except ImportError:
         logger.info("pandas_ta loaded as fallback for indicators.")
     except ImportError:
         raise ImportError(
-            "Install TA-Lib (`pip install TA-Lib`) or pandas_ta (`pip install pandas_ta`) to compute indicators.")
+            "Install TA-Lib (`pip install TA-Lib`) or pandas_ta (`pip install pandas_ta`) to compute indicators."
+        )
+
+# -----------------------------
+# Core indicators
+# -----------------------------
 
 
 def compute_sma(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col: Optional[str] = None) -> pd.DataFrame:
-    """Compute simple moving average."""
     out_col = out_col or f"SMA_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -37,7 +43,6 @@ def compute_sma(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col:
 
 
 def compute_ema(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col: Optional[str] = None) -> pd.DataFrame:
-    """Compute exponential moving average."""
     out_col = out_col or f"EMA_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -48,7 +53,6 @@ def compute_ema(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col:
 
 
 def compute_rsi(df: pd.DataFrame, col: str = "Close", period: int = 14, out_col: Optional[str] = None) -> pd.DataFrame:
-    """Compute Relative Strength Index (RSI)."""
     out_col = out_col or f"RSI_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -58,14 +62,7 @@ def compute_rsi(df: pd.DataFrame, col: str = "Close", period: int = 14, out_col:
     return df
 
 
-def compute_macd(
-    df: pd.DataFrame, col: str = "Close",
-    fast: int = 12, slow: int = 26, signal: int = 9
-) -> pd.DataFrame:
-    """
-    Compute MACD, returns original df with three new columns:
-      MACD, MACD_signal, MACD_hist
-    """
+def compute_macd(df: pd.DataFrame, col: str = "Close", fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame:
     df = df.copy()
     if _HAS_TALIB:
         macd, macdsignal, macdhist = talib.MACD(
@@ -80,24 +77,75 @@ def compute_macd(
     df["MACD_hist"] = macdhist
     return df
 
+# -----------------------------
+# Additional Indicators
+# -----------------------------
 
-def compute_all_indicators(
-    df: pd.DataFrame, close_col: str = "Close"
-) -> pd.DataFrame:
-    """
-    Compute SMA20, EMA20, RSI14, MACD for a DataFrame.
-    """
-    df = compute_sma(df, col=close_col, period=20)
-    df = compute_ema(df, col=close_col, period=20)
-    df = compute_rsi(df, col=close_col, period=14)
-    df = compute_macd(df, col=close_col)
+
+def compute_bollinger_bands(df: pd.DataFrame, col: str = "Close", period: int = 20, nb_std: int = 2) -> pd.DataFrame:
+    df = df.copy()
+    if _HAS_TALIB:
+        upper, middle, lower = talib.BBANDS(
+            df[col], timeperiod=period, nbdevup=nb_std, nbdevdn=nb_std, matype=0)
+        df["BB_upper"] = upper
+        df["BB_middle"] = middle
+        df["BB_lower"] = lower
+    else:
+        bb = pta.bbands(df[col], length=period, std=nb_std)
+        df = pd.concat([df, bb], axis=1)
     return df
 
 
+def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
+    df = df.copy()
+    if _HAS_TALIB:
+        df[f"ATR_{period}"] = talib.ATR(
+            df["High"], df["Low"], df["Close"], timeperiod=period)
+    else:
+        df[f"ATR_{period}"] = pta.atr(
+            df["High"], df["Low"], df["Close"], length=period)
+    return df
+
+
+def compute_stochastic(df: pd.DataFrame, k_period: int = 14, d_period: int = 3) -> pd.DataFrame:
+    df = df.copy()
+    if _HAS_TALIB:
+        slowk, slowd = talib.STOCH(df["High"], df["Low"], df["Close"], fastk_period=k_period,
+                                   slowk_period=d_period, slowk_matype=0, slowd_period=d_period, slowd_matype=0)
+        df["STOCH_K"] = slowk
+        df["STOCH_D"] = slowd
+    else:
+        stoch = pta.stoch(df["High"], df["Low"],
+                          df["Close"], k=k_period, d=d_period)
+        df = pd.concat([df, stoch], axis=1)
+    return df
+
+# -----------------------------
+# All-in-one indicator function
+# -----------------------------
+
+
+def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    df = compute_sma(df)
+    df = compute_ema(df)
+    df = compute_rsi(df)
+    df = compute_macd(df)
+    df = compute_bollinger_bands(df)
+    df = compute_atr(df)
+    df = compute_stochastic(df)
+    return df
+
+
+# -----------------------------
+# Quick test
+# -----------------------------
 if __name__ == "__main__":
-    # quick test
     df = pd.DataFrame({
-        "Close": [100, 102, 101, 103, 105, 104, 106, 107, 108, 110, 109, 111, 112, 113, 114]
+        "Open": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109],
+        "High": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110],
+        "Low": [99, 100, 101, 102, 103, 104, 105, 106, 107, 108],
+        "Close": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109],
+        "Volume": [1000, 1200, 1300, 1100, 1150, 1400, 1350, 1500, 1450, 1600]
     })
     df_ind = compute_all_indicators(df)
     print(df_ind.tail(5))
