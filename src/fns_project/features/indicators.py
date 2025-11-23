@@ -33,6 +33,7 @@ except ImportError:
 
 
 def compute_sma(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col: Optional[str] = None) -> pd.DataFrame:
+    """Function description."""
     out_col = out_col or f"SMA_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -43,6 +44,7 @@ def compute_sma(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col:
 
 
 def compute_ema(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col: Optional[str] = None) -> pd.DataFrame:
+    """Function description."""
     out_col = out_col or f"EMA_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -53,6 +55,7 @@ def compute_ema(df: pd.DataFrame, col: str = "Close", period: int = 20, out_col:
 
 
 def compute_rsi(df: pd.DataFrame, col: str = "Close", period: int = 14, out_col: Optional[str] = None) -> pd.DataFrame:
+    """Function description."""
     out_col = out_col or f"RSI_{period}"
     df = df.copy()
     if _HAS_TALIB:
@@ -63,6 +66,7 @@ def compute_rsi(df: pd.DataFrame, col: str = "Close", period: int = 14, out_col:
 
 
 def compute_macd(df: pd.DataFrame, col: str = "Close", fast: int = 12, slow: int = 26, signal: int = 9) -> pd.DataFrame:
+    """Function description."""
     df = df.copy()
     if _HAS_TALIB:
         macd, macdsignal, macdhist = talib.MACD(
@@ -83,6 +87,7 @@ def compute_macd(df: pd.DataFrame, col: str = "Close", fast: int = 12, slow: int
 
 
 def compute_bollinger_bands(df: pd.DataFrame, col: str = "Close", period: int = 20, nb_std: int = 2) -> pd.DataFrame:
+    """Function description."""
     df = df.copy()
     if _HAS_TALIB:
         upper, middle, lower = talib.BBANDS(
@@ -97,6 +102,7 @@ def compute_bollinger_bands(df: pd.DataFrame, col: str = "Close", period: int = 
 
 
 def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
+    """Function description."""
     df = df.copy()
     if _HAS_TALIB:
         df[f"ATR_{period}"] = talib.ATR(
@@ -108,6 +114,7 @@ def compute_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
 
 
 def compute_stochastic(df: pd.DataFrame, k_period: int = 14, d_period: int = 3) -> pd.DataFrame:
+    """Function description."""
     df = df.copy()
     if _HAS_TALIB:
         slowk, slowd = talib.STOCH(df["High"], df["Low"], df["Close"], fastk_period=k_period,
@@ -126,6 +133,7 @@ def compute_stochastic(df: pd.DataFrame, k_period: int = 14, d_period: int = 3) 
 
 
 def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """Function description."""
     df = compute_sma(df)
     df = compute_ema(df)
     df = compute_rsi(df)
