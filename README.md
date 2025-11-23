@@ -122,7 +122,7 @@ predicting-price-moves-with--newssentiment/
 ├── configs/                        # YAML/JSON config files for experiments
 │   └── default.yaml
 ├── requirements.txt
-├── pyproject.toml / setup.cfg      # packaging / build metadata (optional)
+├── add_docstrings.py
 ├── README.md
 └── .gitignore
 
