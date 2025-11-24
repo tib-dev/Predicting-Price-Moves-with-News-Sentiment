@@ -1,0 +1,30 @@
+experiment_name: "experiment_X"
+description: "Testing different indicators and HF sentiment model"
+
+override:
+  sentiment:
+    model: "hf"
+    hf_model:
+      name: "ProsusAI/finbert"
+      batch_size: 16
+
+  indicators:
+    volatility:
+      rolling_volatility:
+        window: 30
+
+  pipeline:
+    steps:
+      - load_news
+      - load_prices
+      - clean_news
+      - preprocess_prices
+      - align_dates
+      - compute_indicators
+      - compute_sentiment
+      - build_features
+      - run_correlation
+      - run_regression_model
+
+  output:
+    correlation_report: "outputs/expX_correlation.json"
