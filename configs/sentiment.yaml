@@ -1,0 +1,27 @@
+sentiment:
+  model: "vader"  # options: vader, textblob, hf
+  normalize: true
+  scale: "[-1,1]"
+
+vader:
+  use_builtin: true
+
+textblob:
+  polarity_thresholds:
+    positive: 0.1
+    negative: -0.1
+
+hf_model:
+  name: "ProsusAI/finbert"
+  device: "cpu"
+  batch_size: 8
+
+aggregation:
+  method: "daily_mean"   # options: daily_mean, weighted, sum
+  weight_by: "article_length"  # optional
+
+cleaning:
+  lowercase: true
+  strip_punctuation: true
+  remove_stopwords: true
+  lemmatize: false
