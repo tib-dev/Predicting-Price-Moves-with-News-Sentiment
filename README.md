@@ -63,6 +63,7 @@ The project focuses on:
 
 ## Folder Structure
 
+```text
 Predicting-Price-Moves-with-News-Sentiment/
 ├── .github/
 │   └── workflows/
@@ -179,7 +180,7 @@ Predicting-Price-Moves-with-News-Sentiment/
 ├── pyproject.toml                     # preferred for modern builds
 ├── README.md
 └── .gitignore
-
+```
 
 ## Setup & Installation
 
