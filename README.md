@@ -63,71 +63,123 @@ The project focuses on:
 
 ## Folder Structure
 
-```text
-predicting-price-moves-with--newssentiment/
+Predicting-Price-Moves-with-News-Sentiment/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                 # CI: tests, lint, build
-├── docs/                          # Project docs (Sphinx/MD)
-│   └── index.md
-├── notebooks/                      # Exploratory notebooks (not checked in long-term)
-│   ├── eda_news.ipynb
-│   ├── eda_prices.ipynb
-│   └── correlation.ipynb
-├── src/                            # Production Python package (importable)
-│   └── fns_project/                # package root (use your project name)
+│       ├── ci.yml
+│       └── codeql.yml                 # Security scanning
+│
+├── configs/
+│   ├── default.yaml                   # Base pipeline config
+│   ├── indicators.yaml                # Indicator selection
+│   ├── sentiment.yaml                 # Sentiment model config
+│   └── experiment_X.yaml              # Experiment presets
+│
+├── data/
+│   ├── raw/                           # NEVER touched by code
+│   ├── interim/                       # Cleaned but not final
+│   ├── processed/                     # Ready for modeling
+│   └── sample/                        # Small test datasets
+│
+├── docs/
+│   ├── api/
+│   ├── architecture.md                # System design diagrams
+│   ├── pipeline.md                    # Task1–3 explanations
+│   └── deployment.md                  # How to deploy
+│
+├── notebooks/
+│   ├── exploration/                   # EDA, visualization
+│   │   ├── eda_news.ipynb
+│   │   ├── eda_prices.ipynb
+│   │   └── correlation.ipynb
+│   └── experiments/                   # Try models/ideas here
+│
+├── scripts/
+│   ├── download_news.py               # CLI script
+│   ├── download_prices.py
+│   ├── run_pipeline.py                # Runs entire Task 1–3
+│   ├── run_sentiment.py
+│   └── run_correlation.py
+│
+├── src/
+│   └── fns_project/
 │       ├── __init__.py
-│       ├── config.py               # global config, constants, paths
-│       ├── logging_config.py       # logger setup
-│       ├── data/                   # data ingestion & transforms
+│       ├── config.py
+│       ├── logging_config.py
+│
+│       ├── data/                      # ingestion + preprocessing
 │       │   ├── __init__.py
-│       │   ├── loader.py           # load news & price files
-│       │   ├── align_dates.py      # date normalization & trading-day mapping
-│       │   └── preprocess.py       # cleaning, text normalization
-│       │   └── news_pipeline.py    # containing the OO wrappers and orchestration layer.
-│       ├── features/               # feature engineering & indicators
+│       │   ├── loader.py              # load CSV, Parquet, APIs
+│       │   ├── fetch_api.py           # yfinance / polygon / newsapi
+│       │   ├── align.py               # timestamp normalization
+│       │   ├── preprocess_text.py     # clean headlines
+│       │   ├── preprocess_prices.py   # price cleaning filters
+│       │   └── pipeline_news.py       # orchestrated news pipeline
+│
+│       ├── features/                  # feature engineering
 │       │   ├── __init__.py
-│       │   ├── indicators.py       # wrappers for ta/pandas_ta/TA-Lib
-│       │   └── sentiment_features.py
-│       ├── nlp/                    # NLP utilities & models
+│       │   ├── indicators.py          # TA-Lib/pandas-ta wrappers
+│       │   ├── volatility.py          # GARCH, ATR, realized vol
+│       │   ├── sentiment_features.py  # daily aggregates, rolling
+│       │   └── feature_store.py       # read/write feature datasets
+│
+│       ├── nlp/                       # NLP + sentiment
 │       │   ├── __init__.py
-│       │   ├── sentiment.py        # sentiment scoring functions (vader/textblob/hf)
-│       │   └── topic_modeling.py   # TF-IDF, LDA helpers
-│       ├── analysis/               # statistical analysis, correlation logic
+│       │   ├── sentiment.py           # VADER/TextBlob/HF scoring
+│       │   ├── vectorizer.py          # TF-IDF, embeddings
+│       │   └── topic_model.py         # optional: LDA, NMF
+│
+│       ├── analysis/                  # statistical analysis
 │       │   ├── __init__.py
-│       │   ├── correlation.py      # correlation & lag analysis
-│       │   └── stats.py            # tests, p-values, regression helpers
-│       ├── viz/                    # plotting & dashboards
+│       │   ├── returns.py             # returns/log-returns, volatility
+│       │   ├── correlation.py         # sentiment ↔ price correlation
+│       │   └── stats_tools.py         # p-values, regression, tests
+│
+│       ├── models/                    # ML/forecasting (future ready)
 │       │   ├── __init__.py
-│       │   ├── plots.py            # reusable plotting functions
-│       │   └── dashboard.py        # streamlit/fastapi endpoints (if any)
-│       └── utils/                  # small helpers
+│       │   ├── baseline_regressor.py
+│       │   └── lstm_predictor.py
+│
+│       ├── api/                       # optional FastAPI endpoints
+│       │   ├── __init__.py
+│       │   ├── app.py
+│       │   └── routers/
+│       │       ├── news.py
+│       │       └── indicators.py
+│
+│       ├── viz/
+│       │   ├── __init__.py
+│       │   ├── plots.py               # price + sentiment charts
+│       │   ├── dashboards.py          # panel, plotly dashboards
+│       │   └── report_builder.py      # HTML/PDF summary reports
+│
+│       └── utils/
 │           ├── __init__.py
-│           ├── io.py               # read/write helpers (csv/parquet)
-│           └── dates.py            # date helpers & timezone utilities
-├── scripts/                        # CLI convenience scripts (data download, run)
-│   ├── download_data.py
-│   ├── run_training.py
-│   └── run_analysis.py
-├── tests/                          # Unit & integration tests
+│           ├── dates.py
+│           ├── io_utils.py
+│           ├── validators.py          # input validation
+│           └── caching.py             # caching for speed
+│
+├── tests/
 │   ├── unit/
 │   │   ├── test_loader.py
 │   │   ├── test_sentiment.py
-│   │   └── test_indicators.py
+│   │   ├── test_indicators.py
+│   │   ├── test_correlation.py
+│   │   └── test_date_utils.py
 │   └── integration/
-│       └── test_pipeline.py
-├── data/                           # small sample/test data (gitignored large data)
-│   ├── raw_sample/
-│   └── processed_sample/
-├── configs/                        # YAML/JSON config files for experiments
-│   └── default.yaml
+│       ├── test_full_news_pipeline.py
+│       └── test_full_correlation.py
+│
+├── docker/
+│   ├── Dockerfile
+│   └── docker-compose.yml             # db/cache + API
+│
 ├── requirements.txt
-├── add_docstrings.py
+├── pyproject.toml                     # preferred for modern builds
 ├── README.md
 └── .gitignore
 
-
-```
 
 ## Setup & Installation
 
