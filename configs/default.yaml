@@ -1,0 +1,42 @@
+project_name: "Predicting-Price-Moves-with-News-Sentiment"
+version: 1.0.0
+
+paths:
+  raw_data: "data/raw"
+  interim_data: "data/interim"
+  processed_data: "data/processed"
+  feature_store: "data/processed/features"
+  logs: "logs"
+
+data:
+  assets:
+    - "AAPL"
+    - "MSFT"
+  price_source: "yfinance"
+  news_source: "newsapi"
+  start_date: "2018-01-01"
+  end_date: "2024-01-01"
+
+pipeline:
+  steps:
+    - load_news
+    - load_prices
+    - clean_news
+    - preprocess_prices
+    - align_dates
+    - compute_indicators
+    - compute_sentiment
+    - build_features
+    - run_correlation
+
+indicators_config: "configs/indicators.yaml"
+sentiment_config: "configs/sentiment.yaml"
+experiment: null
+
+logging:
+  level: "INFO"
+  file: "logs/pipeline.log"
+
+output:
+  correlation_report: "outputs/correlation_report.json"
+  plots_dir: "outputs/plots"
