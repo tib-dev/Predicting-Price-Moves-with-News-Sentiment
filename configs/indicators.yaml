@@ -1,0 +1,33 @@
+moving_averages:
+  sma:
+    - window: 20
+    - window: 50
+    - window: 200
+  ema:
+    - window: 12
+    - window: 26
+
+momentum:
+  rsi:
+    window: 14
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+
+volatility:
+  atr:
+    window: 14
+  rolling_volatility:
+    window: 20
+
+volume:
+  obv: true
+
+bollinger_bands:
+  window: 20
+  num_std: 2
+
+options:
+  use_talib: true
+  use_pandas_ta: true
