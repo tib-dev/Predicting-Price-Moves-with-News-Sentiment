@@ -113,8 +113,6 @@ Predicting-Price-Moves-with-News-Sentiment/
 │       │   ├── loader.py              # load CSV, Parquet, APIs
 │       │   ├── fetch_api.py           # yfinance / polygon / newsapi
 │       │   ├── align.py               # timestamp normalization
-│       │   ├── preprocess_text.py     # clean headlines
-│       │   ├── preprocess_prices.py   # price cleaning filters
 │       │   └── pipeline_news.py       # orchestrated news pipeline
 │
 │       ├── features/                  # feature engineering
