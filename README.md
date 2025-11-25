@@ -149,14 +149,12 @@ Predicting-Price-Moves-with-News-Sentiment/
 │       ├── viz/
 │       │   ├── __init__.py
 │       │   ├── plots.py               # price + sentiment charts
-│       │   ├── dashboards.py          # panel, plotly dashboards
+│       │   ├── dashboard.py          # panel, plotly dashboards
 │       │   └── report_builder.py      # HTML/PDF summary reports
 │
 │       └── utils/
 │           ├── __init__.py
 │           ├── dates.py
-│           ├── io_utils.py
-│           ├── validators.py          # input validation
 │           └── caching.py             # caching for speed
 │
 ├── tests/
