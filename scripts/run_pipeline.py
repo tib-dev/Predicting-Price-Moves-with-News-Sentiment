@@ -67,7 +67,7 @@ def main(experiment_file: str = None):
     print(corr_df.head())
 
     # Optional: save results
-    output_dir = Path(price_cfg.get("output_dir", "data/processed"))
+    output_dir = Path(price_cfg.get("output_dir", "../data/processed"))
     output_dir.mkdir(parents=True, exist_ok=True)
     df_price_aligned.to_csv(
         output_dir / "price_with_indicators.csv", index=False)
