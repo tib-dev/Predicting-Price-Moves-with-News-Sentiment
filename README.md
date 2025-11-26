@@ -113,7 +113,8 @@ Predicting-Price-Moves-with-News-Sentiment/
 │       │   ├── loader.py              # load CSV, Parquet, APIs
 │       │   ├── fetch_api.py           # yfinance / polygon / newsapi
 │       │   ├── align.py               # timestamp normalization
-│       │   └── pipeline_news.py       # orchestrated news pipeline
+│       │   ├── pipeline_news.py       # orchestrated news pipeline
+│       │   ├── preprocess.py           # Clean
 │
 │       ├── features/                  # feature engineering
 │       │   ├── __init__.py
@@ -149,13 +150,15 @@ Predicting-Price-Moves-with-News-Sentiment/
 │       ├── viz/
 │       │   ├── __init__.py
 │       │   ├── plots.py               # price + sentiment charts
-│       │   ├── dashboard.py          # panel, plotly dashboards
+│       │   ├── dashboard.py           # panel, plotly dashboards
 │       │   └── report_builder.py      # HTML/PDF summary reports
 │
 │       └── utils/
 │           ├── __init__.py
 │           ├── dates.py
-│           └── caching.py             # caching for speed
+│           ├── caching.py             # caching for speed
+│           ├── notebook_bootstrap.py  # load setup
+│           └── io.py  # load setup
 │
 ├── tests/
 │   ├── unit/
