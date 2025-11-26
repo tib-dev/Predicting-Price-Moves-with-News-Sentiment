@@ -11,6 +11,7 @@ env/
 
 # Jupyter
 .ipynb_checkpoints/
+notebooks/logs/
 
 # OS
 .DS_Store
@@ -26,3 +27,4 @@ data
 data/
 *.csv
 *.tsv
+*.parquet
