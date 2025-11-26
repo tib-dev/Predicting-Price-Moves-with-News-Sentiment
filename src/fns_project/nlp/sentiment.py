@@ -8,7 +8,7 @@ import logging
 import pandas as pd
 
 # local imports from your modules
-from fns_project.preprocess import clean_text, preprocess_headlines, add_headline_metrics
+from fns_project.data.preprocess import clean_text, preprocess_headlines, add_headline_metrics
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO,
