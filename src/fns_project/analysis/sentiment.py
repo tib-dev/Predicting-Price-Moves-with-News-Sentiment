@@ -6,7 +6,7 @@ import logging
 
 import pandas as pd
 
-from fns_project.preprocess import preprocess_headlines, add_headline_metrics
+from fns_project.data.preprocess import preprocess_headlines, add_headline_metrics
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO,
