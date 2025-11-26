@@ -1,14 +1,26 @@
-"""Module description."""
 import logging
+from pathlib import Path
+from typing import Optional
+from .config import ConfigLoader
 
 
-"""Function description."""
+def setup_logger(cfg: ConfigLoader, name: str = __name__) -> logging.Logger:
+    log_cfg = cfg.get("logging", {})
+    log_file = Path(log_cfg.get("file", "logs/pipeline.log"))
+    log_file.parent.mkdir(parents=True, exist_ok=True)
 
-def configure_logging(level: int = logging.INFO):
-    """Function description."""
-    fmt = "%(asctime)s %(levelname)s %(name)s: %(message)s"
-    logging.basicConfig(level=level, format=fmt)
+    # Configure root logger
+    logging.basicConfig(
+        filename=log_file,
+        level=getattr(logging, log_cfg.get("level", "INFO").upper()),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
 
-    # Quiet down noisy libraries
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("matplotlib").setLevel(logging.WARNING)
+    # Add console handler
+    console = logging.StreamHandler()
+    console.setLevel(getattr(logging, log_cfg.get("level", "INFO").upper()))
+    console.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    logging.getLogger().addHandler(console)
+
+    return logging.getLogger(name)
