@@ -101,3 +101,28 @@ def create_sentiment_features(
     daily_sent = add_lagged_sentiment(daily_sent, lags=lag_days)
     return daily_sent
 
+
+def aggregate_daily_sentiment_from_news(
+    news_df: pd.DataFrame,
+    date_col: str = "date",
+    headline_col: str = "headline",
+    preprocess_args: Optional[dict] = None,
+    rolling_windows: Optional[List[int]] = None,
+    lag_days: Optional[List[int]] = None
+) -> pd.DataFrame:
+    """
+    Wrapper for create_sentiment_features to produce daily sentiment features from raw news.
+
+    Returns a DataFrame indexed by date with:
+    - news_count
+    - sentiment_mean / median / std
+    - rolling and lagged sentiment features
+    """
+    return create_sentiment_features(
+        news_df=news_df,
+        date_col=date_col,
+        headline_col=headline_col,
+        preprocess_args=preprocess_args,
+        rolling_windows=rolling_windows,
+        lag_days=lag_days
+    )
