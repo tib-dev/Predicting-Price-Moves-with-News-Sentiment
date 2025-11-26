@@ -11,10 +11,14 @@ paths:
 data:
   assets:
     - "AAPL"
+    - "AMZN"
+    - "GOOG"
+    - "META"
     - "MSFT"
+    - "NVDA"
   price_source: "yfinance"
   news_source: "newsapi"
-  start_date: "2018-01-01"
+  start_date: "2023-01-01"
   end_date: "2024-01-01"
 
 pipeline:
@@ -29,14 +33,7 @@ pipeline:
     - build_features
     - run_correlation
 
-indicators_config: "configs/indicators.yaml"
-sentiment_config: "configs/sentiment.yaml"
-experiment: null
-
 logging:
-  level: "INFO"
   file: "logs/pipeline.log"
-
-output:
-  correlation_report: "outputs/correlation_report.json"
-  plots_dir: "outputs/plots"
+  level: "INFO"
+  format: "%(asctime)s %(levelname)s %(message)s"
