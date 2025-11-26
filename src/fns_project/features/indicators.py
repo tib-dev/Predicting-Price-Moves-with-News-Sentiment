@@ -89,14 +89,35 @@ def compute_stochastic(df: pd.DataFrame, k_period: int = 14, d_period: int = 3) 
 # All-in-one function
 # -----------------------------
 def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute a full set of TA-Lib indicators on a DataFrame.
+    Automatically adjusts periods if DataFrame is shorter than required.
+    """
     out = df.copy()
-    out = compute_sma(out)
-    out = compute_ema(out)
-    out = compute_rsi(out)
-    out = compute_macd(out)
-    out = compute_bollinger_bands(out)
-    out = compute_atr(out)
-    out = compute_stochastic(out)
+    n_rows = len(out)
+
+    # Adjust periods if not enough data
+    sma_period = min(20, n_rows)
+    ema_period = min(20, n_rows)
+    rsi_period = min(14, n_rows)
+    macd_fast = min(12, n_rows)
+    macd_slow = min(26, n_rows)
+    macd_signal = min(9, n_rows)
+    bb_period = min(20, n_rows)
+    atr_period = min(14, n_rows)
+    stoch_k = min(14, n_rows)
+    stoch_d = min(3, n_rows)
+
+    out = compute_sma(out, period=sma_period)
+    out = compute_ema(out, period=ema_period)
+    out = compute_rsi(out, period=rsi_period)
+    out = compute_macd(out, fast=macd_fast, slow=macd_slow, signal=macd_signal)
+    out = compute_bollinger_bands(out, period=bb_period)
+    out = compute_atr(out, period=atr_period)
+    out = compute_stochastic(out, k_period=stoch_k, d_period=stoch_d)
+
+    # Drop initial NaN rows (optional, keeps only rows with all indicators)
+    out = out.dropna().reset_index(drop=True)
     return out
 
 
