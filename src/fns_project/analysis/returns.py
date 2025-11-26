@@ -1,36 +1,38 @@
 # src/fns_project/analysis/returns.py
-"""Compute stock returns."""
-
-from typing import Optional
 import pandas as pd
 import numpy as np
-from fns_project.logging_config import get_logger
-
-logger = get_logger(__name__)
-
 
 def compute_daily_returns(
-    price_df: pd.DataFrame, close_col: str = "Close", date_col: str = "date"
+    price_df: pd.DataFrame,
+    close_col: str = "Close",
+    date_col: str = "date",
+    include_log: bool = True,
+    fill_na: bool = False
 ) -> pd.DataFrame:
     """
-    Compute daily returns (percentage change) from price data.
+    Compute daily and log returns from price data, keeping all original columns.
 
     Parameters
     ----------
     price_df : pd.DataFrame
-        DataFrame with price data.
+        DataFrame containing OHLCV data.
     close_col : str
         Column name for closing price.
     date_col : str
         Column name for date.
+    include_log : bool
+        Whether to compute log returns.
+    fill_na : bool
+        Whether to fill first-row NaNs with 0.0.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame indexed by date with 'daily_return' column.
+        Original DataFrame with additional 'daily_return' and optionally 'log_return'.
     """
     df = price_df.copy()
 
+    # Ensure datetime index
     if date_col in df.columns:
         df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
         df = df.dropna(subset=[date_col])
@@ -39,12 +41,21 @@ def compute_daily_returns(
     elif isinstance(df.index, pd.DatetimeIndex):
         df.index = df.index.normalize()
     else:
-        raise ValueError("price_df must have a datetime index or date column")
+        raise ValueError("price_df must have a datetime index or a date column")
 
     df = df.sort_index()
+
+    # Ensure numeric close prices
     if close_col not in df.columns:
         raise ValueError(f"Column '{close_col}' not found in price_df")
     df[close_col] = pd.to_numeric(df[close_col], errors="coerce")
 
-    df["daily_return"] = df[close_col].pct_change().fillna(0.0)
-    return df[["daily_return"]]
+    # Compute returns
+    df["daily_return"] = df[close_col].pct_change()
+    if include_log:
+        df["log_return"] = np.log(df[close_col]).diff()
+
+    if fill_na:
+        df[["daily_return", "log_return"]] = df[["daily_return", "log_return"]].fillna(0.0)
+
+    return df
