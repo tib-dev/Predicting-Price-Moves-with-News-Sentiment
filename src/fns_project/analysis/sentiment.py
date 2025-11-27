@@ -1,12 +1,11 @@
-"""Module for scoring news sentiment using VADER and TextBlob."""
+"""
+Module for scoring news sentiment using VADER and TextBlob on already-cleaned headlines.
+Also normalizes timestamps and adds an 'hour' column.
+"""
 
 from __future__ import annotations
-from typing import Optional
 import logging
-
 import pandas as pd
-
-from fns_project.data.preprocess import preprocess_headlines, add_headline_metrics
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO,
@@ -14,32 +13,26 @@ logging.basicConfig(level=logging.INFO,
 
 
 # -----------------------------
-# Lazy imports for heavy libraries
+# Lazy imports
 # -----------------------------
 def _get_vader():
-    try:
-        from nltk.sentiment.vader import SentimentIntensityAnalyzer
-    except Exception as e:
-        raise ImportError(
-            "VADER not available. Install nltk and download 'vader_lexicon'."
-        ) from e
+    from nltk.sentiment.vader import SentimentIntensityAnalyzer
+    import nltk
+    nltk.download("vader_lexicon", quiet=True)
     return SentimentIntensityAnalyzer()
 
 
 def _get_textblob():
-    try:
-        from textblob import TextBlob
-    except Exception as e:
-        raise ImportError(
-            "TextBlob not available. Install: pip install textblob") from e
+    from textblob import TextBlob
     return TextBlob
 
 
+# -----------------------------
+# Sentiment scoring helpers
+# -----------------------------
 def _score_vader_series(series: pd.Series) -> pd.DataFrame:
     sia = _get_vader()
-    rows = []
-    for txt in series.fillna("").astype(str):
-        rows.append(sia.polarity_scores(txt))
+    rows = [sia.polarity_scores(str(txt)) for txt in series.fillna("")]
     df = pd.DataFrame(rows, index=series.index)
     df.columns = [f"vader_{c}" for c in df.columns]
     return df
@@ -47,64 +40,85 @@ def _score_vader_series(series: pd.Series) -> pd.DataFrame:
 
 def _score_textblob_series(series: pd.Series) -> pd.DataFrame:
     TextBlob = _get_textblob()
-    polarity = []
-    subjectivity = []
+    polarity, subjectivity = [], []
     for txt in series.fillna("").astype(str):
         tb = TextBlob(txt)
         polarity.append(tb.sentiment.polarity)
         subjectivity.append(tb.sentiment.subjectivity)
-    return pd.DataFrame({"textblob_polarity": polarity, "textblob_subjectivity": subjectivity}, index=series.index)
+    return pd.DataFrame(
+        {"textblob_polarity": polarity, "textblob_subjectivity": subjectivity},
+        index=series.index
+    )
 
 
 def ensemble_score(df: pd.DataFrame, weight_vader: float = 0.7, weight_tb: float = 0.3) -> pd.Series:
-    vader = df.get("vader_compound", pd.Series(
-        0.0, index=df.index)).astype(float)
-    tb = df.get("textblob_polarity", pd.Series(
-        0.0, index=df.index)).astype(float)
+    """Weighted ensemble of VADER and TextBlob polarity scores."""
+    # Ensure we have the correct Series
+    vader = df.get("vader_compound", pd.Series(0.0, index=df.index))
+    tb = df.get("textblob_polarity", pd.Series(0.0, index=df.index))
+
+    # Convert to float Series explicitly
+    vader = pd.Series(vader, index=df.index, dtype=float)
+    tb = pd.Series(tb, index=df.index, dtype=float)
+
     score = weight_vader * vader + weight_tb * tb
-    return score.clip(-1.0, 1.0).rename("sentiment_ensemble")
+    # Ensure result is a Series with name
+    return pd.Series(score, index=df.index, name="sentiment_ensemble").clip(-1.0, 1.0)
 
 
+# -----------------------------
+# Main function
+# -----------------------------
 def add_sentiment_columns(
     df: pd.DataFrame,
     headline_col: str = "headline",
-    preprocess: bool = True,
-    preprocess_args: Optional[dict] = None,
+    date_col: str = "date",
+    original_tz: str = None,
+    target_tz: str = "UTC"
 ) -> pd.DataFrame:
-    preprocess_args = preprocess_args or {}
+    """
+    Compute VADER/TextBlob sentiment scores on cleaned headlines and normalize timestamps.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input news DataFrame with cleaned headlines.
+    headline_col : str
+        Column containing headlines.
+    date_col : str
+        Column with datetime for timestamp normalization.
+    original_tz : str
+        Original timezone of the date column.
+    target_tz : str
+        Target timezone (default: UTC).
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with VADER, TextBlob, ensemble sentiment scores, normalized date, and hour.
+    """
     out = df.copy()
 
     if headline_col not in out.columns:
         raise ValueError(f"DataFrame missing headline column '{headline_col}'")
 
-    # optional preprocessing
-    if preprocess:
-        out["_headline_original"] = out[headline_col].astype(str)
-        cleaned = preprocess_headlines(
-            out,
-            text_col=headline_col,
-            remove_stopwords=preprocess_args.get("remove_stopwords", True),
-            lemmatize=preprocess_args.get("lemmatize", False)
-        )
-        cleaned_map = cleaned[headline_col].to_dict()
-        out["_headline_for_sentiment"] = out.index.map(
-            lambda i: cleaned_map.get(i, out.at[i, headline_col]))
-    else:
-        out["_headline_for_sentiment"] = out[headline_col].astype(str)
-
-    texts = out["_headline_for_sentiment"]
-
+    # Sentiment scoring
+    texts = out[headline_col].astype(str)
     vader_df = _score_vader_series(texts)
     tb_df = _score_textblob_series(texts)
-
     out = pd.concat([out, vader_df, tb_df], axis=1)
     out["sentiment_ensemble"] = ensemble_score(out)
 
-    # optional headline metrics
-    try:
-        out = add_headline_metrics(out, text_col=headline_col)
-    except Exception:
-        logger.debug("Could not add headline metrics (skipping)")
+    # Timestamp normalization
+    if date_col in out.columns:
+        out[date_col] = pd.to_datetime(out[date_col], errors="coerce")
+        if original_tz:
+            out[date_col] = out[date_col].dt.tz_localize(original_tz, ambiguous='NaT', nonexistent='NaT')
+        if target_tz:
+            out[date_col] = out[date_col].dt.tz_convert(target_tz)
+        out['hour'] = out[date_col].dt.hour
+        # Optional: keep date only
+        out[date_col] = out[date_col].dt.date
 
     return out
 
@@ -118,9 +132,10 @@ if __name__ == "__main__":
             "Apple reports blowout earnings, stock jumps",
             "Regulator sues small fintech startup over compliance failures",
             "Mixed signals from Fed minutes; markets uncertain"
-        ]
+        ],
+        "date": ["2025-11-26 14:30:00", "2025-11-26 09:15:00", "2025-11-25 16:45:00"]
     })
-    scored = add_sentiment_columns(sample)
+    scored = add_sentiment_columns(sample, date_col="date", original_tz="Etc/GMT+3")
     print(scored[[
-        "headline", "vader_compound", "textblob_polarity", "sentiment_ensemble"
+        "headline", "vader_compound", "textblob_polarity", "sentiment_ensemble", "date", "hour"
     ]])
