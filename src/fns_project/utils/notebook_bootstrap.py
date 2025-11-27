@@ -72,11 +72,11 @@ paths = _read_section(cfg, "paths")
 output = _read_section(cfg, "output")
 data = _read_section(cfg, "data")
 
-RAW_DIR = Path(paths.get("raw_data", "raw"))
-INTERIM_DIR = Path(paths.get("interim_data", "interim"))
-PROCESSED_DIR = Path(paths.get("processed_data", "processed"))
-FEATURE_DIR = Path(paths.get("feature_store", "features"))
-PLOTS_DIR = Path(output.get("plots_dir", "outputs/plots"))
+RAW_DIR = Path(paths.get("raw_data", "raw")).resolve()
+INTERIM_DIR = Path(paths.get("interim_data", "interim")).resolve()
+PROCESSED_DIR = Path(paths.get("processed_data", "processed")).resolve()
+FEATURE_DIR = Path(paths.get("feature_store", "features")).resolve()
+PLOTS_DIR = Path(output.get("plots_dir", "outputs/plots")).resolve()
 
 # -----------------------------
 # Assets & date range (use defaults if missing)
