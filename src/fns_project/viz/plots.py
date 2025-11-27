@@ -59,12 +59,12 @@ def plot_top_publishers(df, publisher_col="publisher", top_n=10):
     plt.show()
 
 
-def plot_publication_times(df, date_col="date"):
+def plot_publication_times(df, time_col="hour"):
     df = df.copy()
-    df[date_col] = pd.to_datetime(df[date_col])
+    df[time_col] = pd.to_datetime(df[time_col])
 
     plt.figure(figsize=(10, 4))
-    df[date_col].dt.hour.value_counts().sort_index().plot(
+    df[time_col].dt.hour.value_counts().sort_index().plot(
         kind="bar", color="teal")
     plt.title("Articles by Hour")
     plt.xlabel("Hour")
@@ -74,7 +74,7 @@ def plot_publication_times(df, date_col="date"):
     plt.figure(figsize=(10, 4))
     order = ["Monday", "Tuesday", "Wednesday",
              "Thursday", "Friday", "Saturday", "Sunday"]
-    df[date_col].dt.day_name().value_counts().reindex(
+    df[time_col].dt.day_name().value_counts().reindex(
         order).plot(kind="bar", color="orange")
     plt.title("Articles by Day")
     plt.xlabel("Day")
@@ -283,4 +283,53 @@ def plot_returns_vs_sentiment(df, sentiment_col="sentiment_mean", returns_col="d
     plt.axhline(0, color="gray", linestyle="--")
     plt.axvline(0, color="gray", linestyle="--")
     plt.grid(True)
+    plt.show()
+
+
+def plot_sentiment_vs_returns(
+    df: pd.DataFrame,
+    sentiment_col: str = "sentiment_mean_roll_mean_5",
+    returns_col: str = "daily_return",
+    figsize: tuple[int, int] = (14, 5),
+    title: str = "Rolling Sentiment vs Daily Returns"
+):
+    """
+    Plot rolling sentiment and daily returns on a dual-axis chart.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Must have datetime index and the specified sentiment and returns columns.
+    sentiment_col : str
+        Rolling sentiment column to plot.
+    returns_col : str
+        Daily returns column to plot.
+    figsize : tuple
+        Figure size.
+    title : str
+        Plot title.
+    """
+    import matplotlib.pyplot as plt
+
+    df = df.copy()
+    df.index = pd.to_datetime(df.index)
+
+    fig, ax1 = plt.subplots(figsize=figsize)
+
+    # Plot sentiment
+    ax1.plot(df.index, df[sentiment_col], color="blue", label="Sentiment")
+    ax1.set_ylabel("Sentiment", color="blue")
+    ax1.tick_params(axis="y", labelcolor="blue")
+
+    # Plot returns on secondary axis
+    ax2 = ax1.twinx()
+    ax2.plot(df.index, df[returns_col], color="red",
+             alpha=0.5, label="Daily Return")
+    ax2.set_ylabel("Daily Return", color="red")
+    ax2.tick_params(axis="y", labelcolor="red")
+
+    fig.suptitle(title)
+    fig.tight_layout()
+    ax1.legend(loc="upper left")
+    ax2.legend(loc="upper right")
     plt.show()
